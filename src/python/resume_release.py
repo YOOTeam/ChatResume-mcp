@@ -1,5 +1,5 @@
 """
-Chatppt MCP Server
+Resume MCP Server
 """
 import json
 import os
