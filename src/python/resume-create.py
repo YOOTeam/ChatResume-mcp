@@ -64,7 +64,7 @@ async def build_resume(
     """
 
     try:
-        url = API_BASE + '/resumes/build-resume'
+        url = API_BASE + '/mcp/resumes/build-resume'
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data={'text': text, 'name': name if name else '',
                                                     'mobile': mobile if mobile else '', 'job': job if job else '',
@@ -98,7 +98,7 @@ async def match(
     """
 
     try:
-        url = API_BASE + '/resumes/match'
+        url = API_BASE + '/mcp/resumes/match'
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data={'job_title': job_title, 'job_desc': job_desc,
                                                     'resume_url': resume_url},
@@ -124,7 +124,7 @@ async def info(
     """
 
     try:
-        url = API_BASE + '/resumes/info'
+        url = API_BASE + '/mcp/resumes/info'
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data={'requestId': request_id},
                                          headers={'Authorization': 'Bearer ' + API_KEY}, timeout=180)
@@ -170,7 +170,7 @@ async def write(
     """
 
     try:
-        url = API_BASE + '/resumes/write-resume'
+        url = API_BASE + '/mcp/resumes/write-resume'
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data={'text': text, 'task': task, 'scene': scene, 'job': job,
                                                     'industry': industry, 'channels': channels, 'company': company},

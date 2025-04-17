@@ -42,7 +42,7 @@ async def recognize(
         with open(file, 'rb') as fp:
             files = {'file': (os.path.basename(file), fp, 'application/octet-stream')}
 
-            url = API_BASE + '/resumes/cv-recognize'
+            url = API_BASE + '/mcp/resumes/cv-recognize'
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     url,
@@ -78,7 +78,7 @@ async def analyse_data(
     Returns:
         返回解析结果
     """
-    url = API_BASE + '/resumes/jd-analyse'
+    url = API_BASE + '/mcp/resumes/jd-analyse'
     async with httpx.AsyncClient() as client:
         response = await client.post(
             url,
@@ -116,7 +116,7 @@ async def resume_style_write(
         :param color:
     """
     try:
-        url = API_BASE + '/resumes/resume-style'
+        url = API_BASE + '/mcp/resumes/resume-style'
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 url,
