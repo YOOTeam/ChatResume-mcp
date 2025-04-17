@@ -178,3 +178,6 @@ async def write(
             return response.json()
     except httpx.HTTPError as e:
         raise Exception(f"HTTP request failed: {str(e)}") from e
+
+if __name__ == "__main__":
+    mcp.run()
