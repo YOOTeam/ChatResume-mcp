@@ -214,3 +214,6 @@ async def resume_style_write(
         raise Exception(f"HTTP request failed: {str(e)}") from e
     except json.JSONDecodeError:
         print("Error: Failed to decode JSON")
+
+if __name__ == "__main__":
+    mcp.run()

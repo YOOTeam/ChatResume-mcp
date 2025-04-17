@@ -8,7 +8,7 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
 # 创建MCP服务器实例
-mcp = FastMCP("Chatppt Server", log_level="ERROR")
+mcp = FastMCP("Resume Server", log_level="ERROR")
 API_BASE = "https://saas.api.yoo-ai.com"
 # 用户API Key
 API_KEY = os.getenv('API_KEY')
@@ -22,12 +22,6 @@ def check_api_key():
 
 
 @mcp.tool()
-async def check():
-    """查询用户当前配置token"""
-    return os.getenv('API_KEY')
-
-
-@mcp.tool()
 async def recognize(
         file: str = Field(description="上传的文件路径")
 ) -> str:
@@ -35,7 +29,10 @@ async def recognize(
     Name:
         简历解析工具
     Description:
-        简历解析工具
+        步骤：
+        1.简历解析工具分析简历数据内容。
+        2.通过analyse_data使简历内容根据JD分析处理优化。
+        3.通过优化后内容结构生成简历
     Args:
         file：上传的文件路径
     Returns:
@@ -55,30 +52,49 @@ async def recognize(
                 )
                 response = response.json()
 
+                if response['code'] != 200:
+                    return response['msg']
+
                 return response['data']['tagInfo']
     except httpx.HTTPError as e:
         raise Exception(f"HTTP request failed: {str(e)}") from e
     except json.JSONDecodeError:
-        print("Error: Failed to decode JSON")
+        raise Exception("Error: Failed to decode JSON")
 
 
-@mcp.prompt()
+@mcp.tool()
 async def analyse_data(
-        recognize_data: str = Field(description="简历识别内容"),
+        recognize_data=Field(description="简历识别内容"),
         jd: str = Field(description="JD内容")
 ) -> str:
     """
     Name:
         简历内容根据JD分析处理
     Description:
-        根据识别简历结构和JD重新整理美化
+        根据识别简历结构和用户输入的JD信息重新整理美化
     Args:
         recognize_data：分析的数据
         jd：JD内容
     Returns:
         返回解析结果
     """
-    return f"你将收到一段岗位描述和一段简历内容的结构化数据，请根据岗位描述的内容对简历中的工作经验、项目经验、个人介绍、技能特长等部分进行改写润色: \n{jd}\n简历内容如下: \n{recognize_data}"
+    url = API_BASE + '/resumes/jd-analyse'
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            url,
+            data={
+                'data': recognize_data,
+                'jd': jd
+            },
+            headers={'Authorization': 'Bearer ' + API_KEY},
+            timeout=60
+        )
+        response = response.json()
+
+        if response['code'] != 200:
+            return response['msg']
+
+        return response['data']
 
 
 @mcp.tool()
@@ -88,14 +104,16 @@ async def resume_style_write(
 ) -> str:
     """
     Name:
-        通过结构生成简历
+        通过输入参数生成简历
     Description:
         根据简历结构重新生成简历
     Args:
-    color：颜色：红色、橙色、黄色、绿色、青色、蓝色、紫色、粉色、黑色、白色、灰色,
-    modules:简历解析的结构
+        color：颜色：红色、橙色、黄色、绿色、青色、蓝色、紫色、粉色、黑色、白色、灰色,
+        modules:简历解析的结构
     Returns:
         url:简历地址
+        :param modules:
+        :param color:
     """
     try:
         url = API_BASE + '/resumes/resume-style'
@@ -110,8 +128,15 @@ async def resume_style_write(
                 timeout=60
             )
             response = response.json()
+
+            if response['code'] != 200:
+                return response['msg']
+
             return response['data']['url']
     except httpx.HTTPError as e:
         raise Exception(f"HTTP request failed: {str(e)}") from e
     except json.JSONDecodeError:
         print("Error: Failed to decode JSON")
+
+if __name__ == "__main__":
+    mcp.run()
